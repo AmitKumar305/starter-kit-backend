@@ -1,7 +1,7 @@
 #!/bin/sh
 
-REMOTE='ubuntu@ec2-52-15-65-163.us-east-2.compute.amazonaws.com'
-REMOTE_DEVELOPMENT='ubuntu@ec2-18-221-114-34.us-east-2.compute.amazonaws.com'
+REMOTE='{{ssh_production}}'
+REMOTE_DEVELOPMENT='{{ssh_development}}'
 DOCKER_COMPOSE_DEVELOPMENT='docker-compose-development.yml'
 DOCKER_COMPOSE='docker-compose.yml'
 ENV_FILE='./.env'
@@ -10,9 +10,12 @@ NGINX_CONF='./configurations'
 if [ "$1" != "" ]; then
 	DEFAULT_PEM_PATH=$1
 else
-	DEFAULT_PEM_PATH='ssh/faraya-keypair.pem'
+	DEFAULT_PEM_PATH='ssh/app-keypair.pem'
 	DEVELOPMENT_PEM_PATH=$DEFAULT_PEM_PATH
 fi
+
+# the production deployment script is commented out for now.
+# you can remove the comments while pushing this thing on the production servers.
 
 # push the production data first
 # echo $DEFAULT_PEM_PATH
