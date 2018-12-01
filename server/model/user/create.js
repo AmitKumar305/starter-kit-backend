@@ -4,14 +4,13 @@ import {
 	RandomCodeUtility,
 	S3Services,
 } from 'appknit-backend-bundle';
-import { ProfileCompletionService } from '../../services';
 import UsersModel from '../../schemas/user';
 import {
 	S3_BUCKET,
 	NODE_ENV,
 } from '../../constants';
 /**
- * @description service modle function to handle the creation
+ * @description service model function to handle the creation
  * This is a common function that could be used to create as
  * well as update the existing user.
  * of the new user. This will handle the profile completion process
@@ -31,17 +30,17 @@ export default ({
 	about,
 	picture,
 }) => new Promise(async (resolve, reject) => {
-	if (!id || !(phoneCode || phoneNumber || day || month ||
-		year || gender || sportsType || sportsExperience || nationality ||
-		about || picture || languages)) {
-		return reject(ResponseUtility.MISSING_PROPS({ message: 'Missing either of the required properties.' }));
-	}
-	const lookupQuery = { ref: id };
-	const verificationCode = (phoneCode && phoneNumber) ? RandomCodeUtility(6) : undefined;
-	/**
-	 * @todo process sending the verification code via twilio
-	 */
 	try {
+		if (!id || !(phoneCode || phoneNumber || day || month
+			|| year || gender || nationality
+			|| about || picture)) {
+			return reject(ResponseUtility.MISSING_PROPS({ message: 'Missing either of the required properties.' }));
+		}
+		const lookupQuery = { ref: id };
+		const verificationCode = (phoneCode && phoneNumber) ? RandomCodeUtility(6) : undefined;
+		/**
+		 * @todo process sending the verification code via twilio
+		 */
 		const pictureName = picture ? `profile_${Date.now()}` :  undefined;
 		if (pictureName) {
 			const Bucket = `${S3_BUCKET}/${NODE_ENV}/profile`;
@@ -67,32 +66,14 @@ export default ({
 				retryAttempt: 0,
 			} : undefined,
 			gender,
-			sportsType,
-			sportsExperience,
 			nationality,
 			about,
-			languages,
 			lastUpdated: Date.now(),
 		});
 
-		const updated = await UsersModel.findOneAndUpdate(lookupQuery, updateQuery, { upsert: true, new: true });
-		const completion = ProfileCompletionService({
-			sportsType: updated.sportsType,
-			sportsExperience: updated.sportsExperience,
-			day: updated.dob.day,
-			month: updated.dob.month,
-			year: updated.dob.year,
-			gender: updated.gender,
-			languages: updated.languages,
-			nationality: updated.nationality,
-			about: updated.about,
-			picture: updated.picture,
-			country: updated.country,
-		});
-
-		await UsersModel.update({ ...lookupQuery, profileCompletion: { $ne: completion } }, { profileCompletion: completion });
+		await UsersModel.findOneAndUpdate(lookupQuery, updateQuery, { upsert: true, new: true });
 		return resolve(ResponseUtility.SUCCESS());
 	} catch (err) {
-		return resolve(ResponseUtility.SUCCESS());
+		return reject(ResponseUtility.GENERIC_ERR({ message: 'There was some error.', error: err }));
 	}
 });
