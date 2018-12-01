@@ -1,7 +1,7 @@
 /**
 * This is the indexer for hiring requests
-* @author gaurav sharma
-* @since Friday, October 25th, 2018 3:30 PM
+* @author {{app_author}}
+* @since {{app_date}}
 */
 import fs from 'fs';
 

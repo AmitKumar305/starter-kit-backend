@@ -15,10 +15,9 @@ import {
  * This is a common function that could be used to create as
  * well as update the existing user.
  * of the new user. This will handle the profile completion process
- * @author gaurav sharma
- * @since 25th October 2018
+ * @author {{app_author}}
+ * @since {{app_date}}
  *
- * @todo handle the twilio OTP process
  */
 export default ({
 	id,
@@ -28,10 +27,7 @@ export default ({
 	month,
 	year,
 	gender,
-	sportsType,
-	sportsExperience,
 	nationality,
-	languages,
 	about,
 	picture,
 }) => new Promise(async (resolve, reject) => {
