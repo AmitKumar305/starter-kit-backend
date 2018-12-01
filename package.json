@@ -1,5 +1,5 @@
 {
-  "name": "{{app_name}}",
+  "name": "test",
   "version": "1.0.0",
   "description": "The backend code for {{app_name}}",
   "main": "server.js",
@@ -33,6 +33,7 @@
     "morgan": "^1.9.0",
     "passport": "^0.4.0",
     "pm2": "^2.8.0",
+    "sharp": "^0.21.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.1.5",

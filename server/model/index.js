@@ -1,7 +1,7 @@
 /**
 * This is the indexer for model
-* @author gaurav sharma
-* @since Wednesday, October 17, 2018 4:24 PM
+* @author {{app_author}}
+* @since {{app_date}}
 */
 import fs from 'fs';
 
