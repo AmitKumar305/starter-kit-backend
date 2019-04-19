@@ -16,15 +16,12 @@ export const {
 	SHARD,
 	SECRET_STRING,
 	PAGINATION_LIMIT = 30,
-	// faraya coordinates
-	FARAYA_LAT,
-	FARAYA_LONG,
 } = process.env;
 
 const db = process.env.MONGO_DB || '{{app_name}}';
 
 // export const mongoConnectionString = `mongodb://${host}:${port}/${db}`;
-export const mongoConnectionString = `mongodb://${ATLAS_USER}:${ATLAS_PASSWORD}@${CLUSTER1},${CLUSTER2},${CLUSTER3}/${db}?ssl=true&replicaSet=${SHARD}-shard-0&authSource=admin&retryWrites=true`;
+export const mongoConnectionString = `mongodb+srv://${ATLAS_USER}:${ATLAS_PASSWORD}@usermicroservice-5jre5.mongodb.net/${db}?retryWrites=true`;
 
 // this string is unique for each project construction
 export const secretString = SECRET_STRING;
