@@ -52,4 +52,4 @@ jobs:
           name: Build Failure
           when: on_fail
           command: |
-            echo "ERROR building faraya-app $CIRCLE_BRANCH"
+            echo "ERROR building {{app_name}}-app $CIRCLE_BRANCH"
