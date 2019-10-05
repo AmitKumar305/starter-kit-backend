@@ -8,15 +8,16 @@ services:
     image: index.docker.io/{{docker_account}}/{{app_name}}:development
     container_name: 'app'
     ports:
-      - 3000:3000
-    links:
-      - database
-    depends_on:
-      - database
+      - 3001:3001
     environment:
       - NODE_ENV=production
       - MONGO_HOST=database
       - MONGO_DB={{app_name}}
+      - HOST=http://{{aws_production}}/production/api/
+      - RABBITMQ_HOST={{rabbitmq_production_host}}
+      - RABBITMQ_USER={{rabbitmq_production_user}}
+      - RABBITMQ_PASSWORD={{rabbitmq_production_password}}
+      - RABBITMQ_HEARTBEAT=259200
     env_file:
       - .env
 
