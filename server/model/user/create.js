@@ -74,6 +74,6 @@ export default ({
 		await UsersModel.findOneAndUpdate(lookupQuery, updateQuery, { upsert: true, new: true });
 		return resolve(ResponseUtility.SUCCESS());
 	} catch (err) {
-		return reject(ResponseUtility.GENERIC_ERR({ message: 'There was some error.', error: err }));
+		return reject(ResponseUtility.GENERIC_ERR({ message: err.message, error: err }));
 	}
 });

@@ -51,6 +51,6 @@ export default ({
 		await UsersModel.update({ ref: id }, updateQuery);
 		return resolve(ResponseUtility.SUCCESS());
 	} catch (err) {
-		return reject(ResponseUtility.GENERIC_ERR({ message: err.message, error: err.error }));
+		return reject(ResponseUtility.GENERIC_ERR({ message: err.message, error: err }));
 	}
 });

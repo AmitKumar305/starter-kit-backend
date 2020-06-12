@@ -18,6 +18,6 @@ export default ({
 		users.map(user => refactoredResponses.push(Object.assign({}, { ...user._doc })));
 		return resolve(ResponseUtility.SUCCESS_PAGINATION({ data: refactoredResponses, page, limit }));
 	} catch (err) {
-		return reject(ResponseUtility.GENERIC_ERR({ error: err.error, message: err.message }));
+		return reject(ResponseUtility.GENERIC_ERR({ message: err.message, error: err }));
 	}
 });

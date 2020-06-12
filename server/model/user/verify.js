@@ -53,6 +53,6 @@ export default ({
 		}
 		return resolve(ResponseUtility.SUCCESS({ message: 'Already verified.' }));
 	} catch (err) {
-		return reject(ResponseUtility.GENERIC_ERR({ error: err.error, message: err.message }));
+		return reject(ResponseUtility.GENERIC_ERR({ message: err.message, error: err }));
 	}
 });

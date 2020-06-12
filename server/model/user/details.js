@@ -31,6 +31,6 @@ export default ({
 			),
 		}));
 	} catch (err) {
-		return reject(ResponseUtility.GENERIC_ERR({ message: err.message, error: err.error }));
+		return reject(ResponseUtility.GENERIC_ERR({ message: err.message, error: err }));
 	}
 });
