@@ -1,0 +1,33 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ development ]
+jobs:
+
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [10.17.0]
+    steps:
+    - uses: actions/checkout@v2
+    - name: Extract branch name
+      shell: bash
+      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+      id: extract_branch
+    - name: Local Configurations
+      env:
+        DOCKER_LOGIN: ${{secrets.DOCKER_USERNAME}}
+        DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
+      run: |
+        echo "Finished setting up the env variables"
+    - name: build
+      run: |
+        echo "Authenticating docker"
+        docker login -u="{{docker_account}}" -p="{{docker_password}}"
+        echo "Building docker image"
+        docker build -t {{app_name}}/backend:${GITHUB_REF##*/} --build-arg MACHINE_NAME=backend:${GITHUB_REF##*/} .
+        echo "Build the image"
+        docker push {{app_name}}/backend:${GITHUB_REF##*/}
+        echo "Pushed the {{app_name}}/backend:${GITHUB_REF##*/} to the Docker"
