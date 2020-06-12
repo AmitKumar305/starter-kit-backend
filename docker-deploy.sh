@@ -54,3 +54,20 @@ scp -r -i $DEVELOPMENT_PEM_PATH $NGINX_CONF $REMOTE_DEVELOPMENT:~/
 ssh -i $DEVELOPMENT_PEM_PATH $REMOTE_DEVELOPMENT "sudo docker-compose pull"
 ssh -i $DEVELOPMENT_PEM_PATH $REMOTE_DEVELOPMENT "sudo docker-compose down"
 ssh -i $DEVELOPMENT_PEM_PATH $REMOTE_DEVELOPMENT "sudo docker-compose -f docker-compose.yml up -d --force-recreate --remove-orphans"
+
+
+
+# push the staging data on aws server
+echo "Pushing the docker-compose.yml on staging server"
+scp -i $DEVELOPMENT_PEM_PATH $DOCKER_COMPOSE_STAGING $REMOTE_STAGING:~/docker-compose.yml
+
+echo "Pushing the environment files to server"
+scp -i $DEVELOPMENT_PEM_PATH $ENV_FILE $REMOTE_STAGING:~/
+
+echo "Push the nginx configurations"
+scp -r -i $DEVELOPMENT_PEM_PATH $NGINX_CONF $REMOTE_STAGING:~/
+
+# the docker-compose up command to run the docker apps
+ssh -i $DEVELOPMENT_PEM_PATH $REMOTE_STAGING "sudo docker-compose pull"
+ssh -i $DEVELOPMENT_PEM_PATH $REMOTE_STAGING "sudo docker-compose down"
+ssh -i $DEVELOPMENT_PEM_PATH $REMOTE_STAGING "sudo docker-compose -f docker-compose.yml up -d --force-recreate --remove-orphans"

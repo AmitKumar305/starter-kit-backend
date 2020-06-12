@@ -1,4 +1,4 @@
-# This is the production variant of
+# This is the development variant of
 # docker deployment for {{app_name}}
 version: '3'
 services:
