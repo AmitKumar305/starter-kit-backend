@@ -1,73 +1,110 @@
 #!/bin/sh
-
+# endpoints configuration
 REMOTE='{{ssh_production}}'
+REMOTE_STAGING='{{ssh_staging}}'
 REMOTE_DEVELOPMENT='{{ssh_development}}'
+# docker-compose configurations
 DOCKER_COMPOSE_DEVELOPMENT='docker-compose-development.yml'
+DOCKER_COMPOSE_STAGING='docker-compose-staging.yml'
 DOCKER_COMPOSE='docker-compose.yml'
+# config files
 ENV_FILE='./.env'
 NGINX_CONF='./configurations'
 
 if [ "$1" != "" ]; then
-	DEFAULT_PEM_PATH=$1
+	BUILD=$1
 else
-	DEFAULT_PEM_PATH='ssh/app-keypair.pem'
-	DEVELOPMENT_PEM_PATH=$DEFAULT_PEM_PATH
+	BUILD=''
 fi
 
-# the production deployment script is commented out for now.
-# you can remove the comments while pushing this thing on the production servers.
+DEFAULT_PEM_PATH='ssh/{{PEM_FILE}}.pem'
+DEVELOPMENT_PEM_PATH=$DEFAULT_PEM_PATH
 
-# push the production data first
-# echo $DEFAULT_PEM_PATH
-# echo "Pushing the docker-compose-production.yml on server"
+# Triggers the development build
+dev_build()
+{
+	echo "Pushing the docker-compose.yml on development server"
+	scp -i $DEVELOPMENT_PEM_PATH $DOCKER_COMPOSE_DEVELOPMENT $REMOTE_DEVELOPMENT:~/docker-compose.yml
 
-# # push the single compose file
-# scp -i $DEFAULT_PEM_PATH $DOCKER_COMPOSE $REMOTE:~/docker-compose.yml
-
-# echo "Pushing the environment files to server"
-# scp -i $DEFAULT_PEM_PATH $ENV_FILE $REMOTE:~/
-# # scp -i $DEFAULT_PEM_PATH $ENV_PROD $REMOTE:~/
-
-# echo "Push the nginx configurations"
-# scp -r -i $DEFAULT_PEM_PATH $NGINX_CONF $REMOTE:~/
-
-# # run the docker-compose up command to run the docker apps
-# ssh -i $DEFAULT_PEM_PATH $REMOTE "sudo docker-compose pull"
-# ssh -i $DEFAULT_PEM_PATH $REMOTE "sudo docker-compose down"
-# ssh -i $DEFAULT_PEM_PATH $REMOTE "sudo docker-compose -f docker-compose.yml up -d --force-recreate --remove-orphans"
+	echo "Pushing the environment files to server"
+	scp -i $DEVELOPMENT_PEM_PATH $ENV_FILE $REMOTE_DEVELOPMENT:~/
 
 
-# echo "Success pushing the docker compose files to production HAB aws server."
+	echo "Push the nginx configurations"
+	scp -r -i $DEVELOPMENT_PEM_PATH $NGINX_CONF $REMOTE_DEVELOPMENT:~/
 
-# push the development data on aws server
-echo "Pushing the docker-compose.yml on development server"
-scp -i $DEVELOPMENT_PEM_PATH $DOCKER_COMPOSE_DEVELOPMENT $REMOTE_DEVELOPMENT:~/docker-compose.yml
+	# the docker-compose up command to run the docker apps
+	ssh -i $DEVELOPMENT_PEM_PATH $REMOTE_DEVELOPMENT "sudo docker-compose pull"
+	ssh -i $DEVELOPMENT_PEM_PATH $REMOTE_DEVELOPMENT "sudo docker-compose down"
+	ssh -i $DEVELOPMENT_PEM_PATH $REMOTE_DEVELOPMENT "sudo docker-compose -f docker-compose.yml up -d --force-recreate --remove-orphans"
 
-echo "Pushing the environment files to server"
-scp -i $DEVELOPMENT_PEM_PATH $ENV_FILE $REMOTE_DEVELOPMENT:~/
+	echo "Dev deployment complete!"
+}
+
+# triggers the stage build
+stage_build()
+{
+	echo "Pushing the docker-compose.yml on stage server"
+	scp -i $DEVELOPMENT_PEM_PATH $DOCKER_COMPOSE_STAGING $REMOTE_STAGING:~/docker-compose.yml
+
+	echo "Pushing the environment files to server"
+	scp -i $DEVELOPMENT_PEM_PATH $ENV_FILE $REMOTE_STAGING:~/
 
 
-echo "Push the nginx configurations"
-scp -r -i $DEVELOPMENT_PEM_PATH $NGINX_CONF $REMOTE_DEVELOPMENT:~/
+	echo "Push the nginx configurations"
+	scp -r -i $DEVELOPMENT_PEM_PATH $NGINX_CONF $REMOTE_STAGING:~/
 
-# the docker-compose up command to run the docker apps
-ssh -i $DEVELOPMENT_PEM_PATH $REMOTE_DEVELOPMENT "sudo docker-compose pull"
-ssh -i $DEVELOPMENT_PEM_PATH $REMOTE_DEVELOPMENT "sudo docker-compose down"
-ssh -i $DEVELOPMENT_PEM_PATH $REMOTE_DEVELOPMENT "sudo docker-compose -f docker-compose.yml up -d --force-recreate --remove-orphans"
+	# the docker-compose up command to run the docker apps
+	ssh -i $DEVELOPMENT_PEM_PATH $REMOTE_STAGING "sudo docker-compose pull"
+	ssh -i $DEVELOPMENT_PEM_PATH $REMOTE_STAGING "sudo docker-compose down"
+	ssh -i $DEVELOPMENT_PEM_PATH $REMOTE_STAGING "sudo docker-compose -f docker-compose.yml up -d --force-recreate --remove-orphans"
+
+	echo "Stage deployment complete!"
+}
+
+# triggers the prod build
+prod_build()
+{
+	echo "Pushing the docker-compose.yml on prod server"
+	scp -i $DEVELOPMENT_PEM_PATH $DOCKER_COMPOSE $REMOTE:~/docker-compose.yml
+
+	echo "Pushing the environment files to server"
+	scp -i $DEVELOPMENT_PEM_PATH $ENV_FILE $REMOTE:~/
 
 
+	echo "Push the nginx configurations"
+	scp -r -i $DEVELOPMENT_PEM_PATH $NGINX_CONF $REMOTE:~/
 
-# push the staging data on aws server
-echo "Pushing the docker-compose.yml on staging server"
-scp -i $DEVELOPMENT_PEM_PATH $DOCKER_COMPOSE_STAGING $REMOTE_STAGING:~/docker-compose.yml
+	# the docker-compose up command to run the docker apps
+	ssh -i $DEVELOPMENT_PEM_PATH $REMOTE "sudo docker-compose pull"
+	ssh -i $DEVELOPMENT_PEM_PATH $REMOTE "sudo docker-compose down"
+	ssh -i $DEVELOPMENT_PEM_PATH $REMOTE "sudo docker-compose -f docker-compose.yml up -d --force-recreate --remove-orphans"
 
-echo "Pushing the environment files to server"
-scp -i $DEVELOPMENT_PEM_PATH $ENV_FILE $REMOTE_STAGING:~/
+	echo "Prod deployment complete!"
+}
 
-echo "Push the nginx configurations"
-scp -r -i $DEVELOPMENT_PEM_PATH $NGINX_CONF $REMOTE_STAGING:~/
-
-# the docker-compose up command to run the docker apps
-ssh -i $DEVELOPMENT_PEM_PATH $REMOTE_STAGING "sudo docker-compose pull"
-ssh -i $DEVELOPMENT_PEM_PATH $REMOTE_STAGING "sudo docker-compose down"
-ssh -i $DEVELOPMENT_PEM_PATH $REMOTE_STAGING "sudo docker-compose -f docker-compose.yml up -d --force-recreate --remove-orphans"
+echo $BUILD
+if [ "$BUILD" != "" ]; then
+	if [ "$BUILD" == 'dev' ]; then
+		dev_build
+	elif [ "$BUILD" == 'stage' ]; then
+		stage_build
+	elif [ "$BUILD" == 'prod' ]; then
+		prod_build
+	else
+		echo "Invalid environment. Expects either of dev, stage or prod"
+	fi
+else
+	echo "Usage docker-deploy.sh <env> (env: dev | stage | prod)"
+    echo "If no env provided, the script will deploy all environments"
+    echo "Are you sure you want to redeploy all environments (y/n)? "
+    old_stty_cfg=$(stty -g)
+    stty raw -echo ; answer=$(head -c 1) ; stty $old_stty_cfg # Careful playing with stty
+    if echo "$answer" | grep -iq "^y" ;then
+        dev_build
+        stage_build
+        prod_build
+    else
+        echo 'Termination on No prompt'
+    fi
+fi
