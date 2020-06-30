@@ -17,12 +17,6 @@ jobs:
       shell: bash
       run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
       id: extract_branch
-    - name: Local Configurations
-      env:
-        DOCKER_LOGIN: ${{secrets.DOCKER_USERNAME}}
-        DOCKER_PASSWORD: ${{secrets.DOCKER_PASSWORD}}
-      run: |
-        echo "Finished setting up the env variables"
     - name: build
       run: |
         echo "Authenticating docker"
