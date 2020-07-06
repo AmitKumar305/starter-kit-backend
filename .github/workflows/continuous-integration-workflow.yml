@@ -1,7 +1,7 @@
 name: Docker Image CI
 on:
   push:
-    branches: [ development, staging, master ]
+    branches: [ development ]
 jobs:
   build:
     if: "!contains(github.event.head_commit.message, '[skip-ci]')"
