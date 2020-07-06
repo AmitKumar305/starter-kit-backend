@@ -6,7 +6,6 @@ on:
 jobs:
 
   build:
-    if: "!contains(github.event.head_commit.message, '[skip-ci]')"
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -20,9 +19,9 @@ jobs:
     - name: build
       run: |
         echo "Authenticating docker"
-        docker login -u="{{docker_account}}" -p="{{docker_password}}"
+        docker login -u ${{ secrets.DOCKER_LOGIN }} -p ${{ secrets.DOCKER_AUTH_TOKEN }}
         echo "Building docker image"
-        docker build -t {{app_name}}/backend:${GITHUB_REF##*/} --build-arg MACHINE_NAME=backend:${GITHUB_REF##*/} .
+        docker build -t shoal/ui:${GITHUB_REF##*/} --build-arg MACHINE_NAME=ui:${GITHUB_REF##*/} .
         echo "Build the image"
-        docker push {{app_name}}/backend:${GITHUB_REF##*/}
-        echo "Pushed the {{app_name}}/backend:${GITHUB_REF##*/} to the Docker"
+        docker push shoal/ui:${GITHUB_REF##*/}
+        echo "Pushed the shoal/ui:${GITHUB_REF##*/} to the Docker"
