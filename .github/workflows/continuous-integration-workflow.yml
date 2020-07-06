@@ -27,10 +27,10 @@ jobs:
         echo "Authenticating docker"
         docker login -u ${{ secrets.DOCKER_LOGIN }} -p ${{ secrets.DOCKER_AUTH_TOKEN }}
         echo "Building docker image"
-        docker build -t shoal/ui:${GITHUB_REF##*/} --build-arg MACHINE_NAME=ui:${GITHUB_REF##*/} .
+        docker build -t {{app_name}}/ui:${GITHUB_REF##*/} --build-arg MACHINE_NAME=ui:${GITHUB_REF##*/} .
         echo "Build the image"
-        docker push shoal/ui:${GITHUB_REF##*/}
-        echo "Pushed the shoal/ui:${GITHUB_REF##*/} to the Docker"
+        docker push {{app_name}}/ui:${GITHUB_REF##*/}
+        echo "Pushed the {{app_name}}/ui:${GITHUB_REF##*/} to the Docker"
     - name: Notify slack success
       if: success()
       env:
