@@ -1,34 +1,54 @@
-import { ResponseUtility } from 'appknit-backend-bundle';
-import UsersModel from '../../schemas/user';
+/* eslint-disable no-underscore-dangle */
+import {
+	ResponseUtility,
+} from 'appknit-backend-bundle';
+import { Types } from 'mongoose';
+import { UserModel } from '../../schemas';
+
 /**
- * @description service model function to fetch the details of the user
- * @author {{app_author}}
- * @since {{app_date}}
+ * @description service model function to handles the details of a user.
+ * @author Abhinav Sharma
+ * @since 10 March, 2021
  */
+
 export default ({
 	id,
-	userId,
+	userRef,
 }) => new Promise(async (resolve, reject) => {
 	try {
-		const lookupQuery = userId ? { ref: userId } : { ref: id };
-		const projection = {
-			registeredOn: 0,
-			lastUpdated: 0,
-			__v: 0,
-		};
-		const user = await UsersModel.findOne(lookupQuery, projection);
+		const [user] = await UserModel.aggregate([
+			{
+				$match: {
+					_id: Types.ObjectId(userRef || id),
+					deleted: false,
+					blocked: false,
+				},
+			},
+			{
+				$unset: [
+					'password',
+					'device',
+					'fcmToken',
+					'emailToken',
+					'emailTokenDate',
+					'socialId',
+					'socialToken',
+					'socialIdentifier',
+					'changePassToken',
+					'changePassTokenDate',
+					'verified',
+					'blocked',
+					'deleted',
+					'__v',
+				],
+			},
+		]);
 		if (!user) {
-			return reject(ResponseUtility.NO_USER);
+			return reject(ResponseUtility.NO_USER());
 		}
 		return resolve(ResponseUtility.SUCCESS({
-			data: Object.assign(
-				{},
-				{ ...user._doc },
-				{
-					isVerified: user._doc.verification && user._doc.verification.isVerified,
-					verification: undefined,
-				},
-			),
+			message: 'Profile fetcheded successfully',
+			data: user,
 		}));
 	} catch (err) {
 		return reject(ResponseUtility.GENERIC_ERR({ message: err.message, error: err }));

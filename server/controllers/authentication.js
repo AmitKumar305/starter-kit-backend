@@ -56,6 +56,10 @@ const commonDecodingHandler = ({
 };
 
 export default {
-	authenticateUser: (req, res, next) => commonDecodingHandler({ req, res, next, type: 'user' }),
-	authenticateAdmin: (req, res, next) => commonDecodingHandler({ req, res, next, type: 'admin' }),
+	authenticateUser: (req, res, next) => commonDecodingHandler({
+		req, res, next, type: 'user',
+	}),
+	authenticateAdmin: (req, res, next) => commonDecodingHandler({
+		req, res, next, type: 'admin',
+	}),
 };

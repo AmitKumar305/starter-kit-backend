@@ -1,7 +1,7 @@
 /**
- * This is the indexer for user model
- * @author Santgurlal Singh
- * @since 07 Jan, 2021
+ * This is the indexer for admin requests.
+ * @author Abhinav Sharma
+ * @since 25 February, 2021
  */
 
 import fs from 'fs';
@@ -14,7 +14,7 @@ files.map((file) => {
 	if (!found) {
 		const fileName = `${file.charAt(0).toUpperCase()}${file.split('.')[0].substring(1, file.length)}`;
 		if (!fileName.startsWith('.')) {
-			module.exports[`Users${fileName}Service`] = require(`./${file}`).default;
+			module.exports[`${fileName}`] = require(`./${file}`).default;
 		}
 	}
 });

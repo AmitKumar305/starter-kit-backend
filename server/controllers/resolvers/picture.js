@@ -1,6 +1,6 @@
 import { S3Services } from 'appknit-backend-bundle';
-import { S3_BUCKET, NODE_ENV } from '../../constants';
 import sharp from 'sharp';
+import { S3_BUCKET, NODE_ENV } from '../../constants';
 /**
  * This moudule acts as a common handler for picture fetching since all the controllers
  * follows almost the same design pattern, making a commong handler function will help to
@@ -14,7 +14,11 @@ import sharp from 'sharp';
  * @todo Handle authentication middleware injections?
 */
 export default (req, res) => {
-	const { query: { path = 'profile', identifier = 'avatar.png', height = 400, width = 400, format = 'jpg' } } = req;
+	const {
+		query: {
+			path = 'profile', identifier = 'avatar.png', height = 400, width = 400, format = 'jpg',
+		},
+	} = req;
 	const Bucket = `${S3_BUCKET}/${NODE_ENV}/${path}`;
 	const Key = identifier;
 	res.type(`image/${format}`);

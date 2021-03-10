@@ -4,43 +4,44 @@
  * @since {{app_date}}
  */
 import { Schema } from 'mongoose';
+import { HashUtility } from 'appknit-backend-bundle';
 import database from '../db';
+import { applyMiddleware } from './commonSchemaMiddleware';
 
 const User = new Schema({
-	name: { type: String },
-	mobile: {
-		code: String,
-		number: Number,
-	},
-	dob: {
-		day: Number,
-		month: Number,
-		year: Number,
-	},
-	verification: {
-		isVerified: Boolean,
-		verificationCode: Number,
-		verificationCodeTimestamp: Number,
-		retryAttempt: Number,
-	},
+	name: String,
+	email: String,
+	password: String,
+	phoneCode: String,
+	phoneNumber: String,
+	dob: Date,
+	verified: { type: Boolean, default: false },
+	blocked: { type: Boolean, default: false },
+	deleted: { type: Boolean, default: false },
 	gender: Number,
 	nationality: String,
 	about: String,
-	registeredOn: Number,
-	lastUpdated: Number,
 	picture: String,
-	profileCompletion: { type: Number, default: 0 },
-}, {
-	toJSON: { virtuals: true },
-	toObject: { virtuals: true },
+	socialId: String,
+	socialToken: String,
+	socialIdentifier: String,
+	emailToken: Number,
+	emailTokenDate: Date,
+	changePassToken: String,
+	changePassTokenDate: Date,
+	fcmToken: String,
+	device: String,
+	deletedOn: Date,
+	createdOn: Date,
+	updatedOn: Date,
 });
 
-User.virtual('userEntity', {
-	ref: 'Entity',
-	localField: 'ref',
-	foreignField: '_id',
-	justOne: true,
+applyMiddleware(User);
+applyMiddleware(User, async function (next) {
+	const data = this;
+	if (data.password) {
+		data.password = await HashUtility.generate({ text: data.password });
+	}
+	next();
 });
-
-
 export default database.model('User', User);

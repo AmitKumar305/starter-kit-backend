@@ -1,9 +1,10 @@
+/* eslint-disable array-callback-return */
+/* eslint-disable global-require */
+/* eslint-disable import/no-dynamic-require */
 /**
- * This is the indexer for user model
- * @author Santgurlal Singh
- * @since 07 Jan, 2021
+* @author Abhinav Sharma
+* @since 10 March 2021
  */
-
 import fs from 'fs';
 
 const skip = ['index.js'];
@@ -14,7 +15,7 @@ files.map((file) => {
 	if (!found) {
 		const fileName = `${file.charAt(0).toUpperCase()}${file.split('.')[0].substring(1, file.length)}`;
 		if (!fileName.startsWith('.')) {
-			module.exports[`Users${fileName}Service`] = require(`./${file}`).default;
+			module.exports[`Notification${fileName}Service`] = require(`./${file}`).default;
 		}
 	}
 });

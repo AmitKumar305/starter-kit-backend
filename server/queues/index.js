@@ -13,7 +13,7 @@ const AMQP_URI = `amqp://${RABBITMQ_USER}:${RABBITMQ_PASSWORD}@${RABBITMQ_HOST}/
  * @description
  * activator for the queues for the express object passed. The
  * Queue directory files are auto-loaded here unless explicitly ignored
- * via skip array. The Queue names are imported camelcased by capitalizing 
+ * via skip array. The Queue names are imported camelcased by capitalizing
  * the first letter of queue channel. For example, The queue channel named
  * "notificationQueue.js" will be assigned a name "NotificationsQueue" on AMQP
  * and hence must be mapped in constants.js so that services could reference it.
