@@ -1,7 +1,6 @@
 /**
-* This multipart service will merge the passed images in the body with the same
-* name, add all fileds from req.body.data to req.body and will add AMQPConnection
-* & AMQPChannel to req.body
+* This multipart service will merge the passed media in the body with the same
+* name, add all fields from req.body.data to req.body
 * @author Abhinav Sharma
 * @since 08 December, 2020
 */
@@ -9,16 +8,16 @@
 export default (req, res, next) => {
 	const {
 		files, body: {
-			data, id, AMQPConnection, AMQPChannel,
+			data, id,
 		},
 	} = req;
 	req.body = data ? (
-		{ ...JSON.parse(data), AMQPConnection, AMQPChannel }) : { AMQPConnection, AMQPChannel };
+		{ ...JSON.parse(data) }) : { };
 	if (id) {
 		req.body.id = id;
 	}
 	if (files && Object.keys(files).length) {
-		req.body.images = files;
+		Object.assign(req.body, { ...files });
 	}
 	return next();
 };

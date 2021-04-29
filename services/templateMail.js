@@ -1,7 +1,7 @@
 /**
 * This service module deals with the sending of template emails
 * @author Abhinav Sharma
-* @since Thursday, January 28, 2021
+* @since Saturday, October 17, 2020
 */
 import fs from 'fs';
 import path from 'path';
@@ -26,7 +26,7 @@ const transporter = nodemailer.createTransport({
 * @param {String} text		-> email content
 * @param {String} subject	-> subject of email
 */
-const sendMail = ({ to, subject = `Mail from ${APP_NAME}`, html }) => new Promise((resolve, reject) => {
+const sendMail = ({ to, subject = 'Mail from Collection-App', html }) => new Promise((resolve, reject) => {
 	transporter.sendMail({
 		from: BUSINESS_EMAIL,
 		to,

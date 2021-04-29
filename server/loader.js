@@ -1,5 +1,5 @@
-require ('@babel/register');
-require ('@babel/polyfill');
-require ('dotenv').config();
+require('@babel/register');
+require('@babel/polyfill');
+require('dotenv').config();
 
-require ('./server.js');
+require('./server.js');

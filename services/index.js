@@ -1,10 +1,9 @@
 /* eslint-disable global-require */
 /**
- * This is the indexer for services
- * @author {{ app_name }}
- * @since {{ app_date }}
- */
-
+* This is the indexer for services
+* @author Jagmohan Singh
+* @since 2 May, 2020
+*/
 import fs from 'fs';
 
 const skip = ['index.js', 'templates'];

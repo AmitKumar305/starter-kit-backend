@@ -5,7 +5,7 @@
 */
 import fs from 'fs';
 
-const skip = ['index.js', ];
+const skip = ['index.js'];
 const files = fs.readdirSync(__dirname);
 
 files.map((file) => {

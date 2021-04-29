@@ -1,57 +1,44 @@
 import {
 	ResponseUtility,
-	PropsValidationUtility,
-	TimeConversionUtility,
 } from 'appknit-backend-bundle';
-import { UsersModel } from '../../schemas';
+import { UserModel } from '../../schemas';
+import { APP_NAME } from '../../constants';
 
-const validProps = ['otpCode'];
 /**
- * @description handle the otp verificiation process
- * @author {{app_author}}
- * @since {{app_date}}
+ * @description handles the emnail verificiation process
+ * @author Abhinav Sharma
+ * @since 10 March, 2021
  */
+
 export default ({
 	id,
-	otpCode,
+	emailToken,
 }) => new Promise(async (resolve, reject) => {
 	try {
-		const { code, message } = await PropsValidationUtility({
-			validProps,
-			sourceDocument: {
-				otpCode,
-			},
-		});
-		if (code !== 100) {
-			return reject(ResponseUtility.MISSING_PROPS({ message }));
+		if (!(id && emailToken)) {
+			return reject(ResponseUtility.GENERIC_ERR({ message: 'Missing either of the required properties.' }));
 		}
-		const user = await UsersModel.findOne({ ref: id });
+
+		const user = await UserModel.findOne({ _id: id, emailToken });
+
 		if (!user) {
-			return reject(ResponseUtility.NO_USER());
+			return resolve('<h1 style="text-align: center">Invalid Access Token.</h1>');
 		}
-		if (user.verification && !user.verification.isVerified) {
-			if (user.verification.verificationCode === otpCode) {
-				if (user.verificationCodeTimestamp + TimeConversionUtility.daysToMillis(1) < Date.now()) {
-					return reject(ResponseUtility.TOKEN_EXPIRED);
-				}
-				const updateQuery = {
-					$unset: {
-						'verification.verificationCode': 1,
-						'verification.verificationCodeTimestamp': 1,
-						'verification.retryAttempt': 1,
-					},
-					$set: { 'verification.isVerified': true },
-				};
-				await UsersModel.update({ ref: id }, updateQuery);
-				return resolve(ResponseUtility.SUCCESS());
-			}
-			if (user.verification.retryAttempt >= 3) {
-				return reject(ResponseUtility.TOKEN_TRY_EXPIRED);
-			}
-			await UsersModel.update({ ref: id }, { $inc: { 'verification.retryAttempt': 1 } });
-			return reject(ResponseUtility.GENERIC_ERR({ message: 'Verification code does not match.' }));
+		if (user.verified) {
+			return resolve('<h1 style="text-align: center">Your account is already verified.</h1>');
 		}
-		return resolve(ResponseUtility.SUCCESS({ message: 'Already verified.' }));
+		const updateQuery = {
+			$set: {
+				verified: true,
+			},
+			$unset:
+			{
+				emailToken: 1,
+				emailTokenDate: 1,
+			},
+		};
+		await UserModel.update({ _id: id }, updateQuery);
+		return resolve(`<h1 style="text-align: center">Your account has been verified. You can now use ${APP_NAME} app.</h1>`);
 	} catch (err) {
 		return reject(ResponseUtility.GENERIC_ERR({ message: err.message, error: err }));
 	}
