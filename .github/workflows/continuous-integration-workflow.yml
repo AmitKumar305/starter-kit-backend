@@ -1,51 +1,47 @@
-name: Docker Image CI
+name: Deploy to Amazon ECS
 on:
   push:
-    branches: [ development ]
+    branches: [ development, staging ]
+
+defaults:
+  run:
+    shell: bash
+
 jobs:
-  build:
-    if: "!contains(github.event.head_commit.message, '[skip-ci]')"
+  deploy:
+    name: Deploy
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [10.17.0]
+    permissions:
+      packages: write
+      contents: read
+
     steps:
-    - uses: voxmedia/github-action-slack-notify-build@v1
-      with:
-        channel_id: ${{ secrets.SLACK_CHANNEL_ID }}
-        status: STARTED
-        color: good
-      env:
-        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-    - uses: actions/checkout@v2
-    - name: Extract branch name
-      shell: bash
-      run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
-      id: extract_branch
-    - name: build
-      run: |
-        echo "Authenticating docker"
-        docker login -u ${{ secrets.DOCKER_LOGIN }} -p ${{ secrets.DOCKER_AUTH_TOKEN }}
-        echo "Building docker image"
-        docker build -t {{app_name}}/ui:${GITHUB_REF##*/} --build-arg MACHINE_NAME=ui:${GITHUB_REF##*/} .
-        echo "Build the image"
-        docker push {{app_name}}/ui:${GITHUB_REF##*/}
-        echo "Pushed the {{app_name}}/ui:${GITHUB_REF##*/} to the Docker"
-    - name: Notify slack success
-      if: success()
-      env:
-        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-      uses: voxmedia/github-action-slack-notify-build@v1
-      with:
-        channel_id: ${{ secrets.SLACK_CHANNEL_ID }}
-        status: SUCCESS
-        color: good
-    - name: Notify slack fail
-      if: failure()
-      env:
-        SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-      uses: voxmedia/github-action-slack-notify-build@v1
-      with:
-        channel_id: ${{ secrets.SLACK_CHANNEL_ID }}
-        status: FAILED
-        color: danger
+      - name: Extract branch name
+        uses: actions/checkout@v2
+        id: extract_branch
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v1
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v1
+
+      - name: Build, tag, and push image to Amazon ECR
+        id: build-image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          # Build a docker container and
+          # push it to ECR so that it can
+          # be deployed to ECS.
+          echo "${GITHUB_REF##*/}"
+          docker build -t $ECR_REGISTRY/backend:${GITHUB_REF##*/} .
+          docker push $ECR_REGISTRY/backend:${GITHUB_REF##*/}
+          echo "::set-output name=image::$ECR_REGISTRY/backend:${GITHUB_REF##*/}"
+          aws ecs update-service --cluster ${GITHUB_REF##*/} --task-definition backend-${GITHUB_REF##*/} --service backend --force-new-deployment
+          aws ecr list-images --repository-name backend --query 'imageIds[?type(imageTag)!=`string`].[imageDigest]' --output text | while read line; do aws ecr batch-delete-image --repository-name backend --image-ids imageDigest=$line; done
